@@ -12,11 +12,7 @@ function Timer({
   onFinish,
   appDispatch,
 }) {
-  const [state, dispatch] = useReducer(reducer, {
-    isStarted: false,
-    isFinished: false,
-  });
-
+  const [state, dispatch] = useReducer(reducer, INITIAL_STATE);
   const [remaining, setRemaining] = useState(initialRemaining);
   const wasFinished = usePrevious(state.isFinished);
   const intervalIdRef = useRef(null);
