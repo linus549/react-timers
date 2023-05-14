@@ -56,7 +56,11 @@ function App() {
 
     if (settings.notifications) {
       const text = label === "" ? DEFAULT_NOTIFICATION_TEXT : label;
-      new Notification(text);
+      navigator.serviceWorker.register("sw.js");
+
+      navigator.serviceWorker.ready.then((registration) =>
+        registration.showNotification(text)
+      );
     }
 
     if (settings.vibration) {
