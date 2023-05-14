@@ -15,6 +15,6 @@ function VibrationToggle({ checked, onChange }) {
   );
 }
 
-const isVibrationAvailable = "vibrate" in Navigator;
+const isVibrationAvailable = "vibrate" in navigator;
 
 export default VibrationToggle;

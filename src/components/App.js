@@ -60,7 +60,7 @@ function App() {
     }
 
     if (settings.vibration) {
-      Navigator.vibrate(VIBRATION_DURATION);
+      navigator.vibrate(VIBRATION_DURATION);
     }
   }
 
