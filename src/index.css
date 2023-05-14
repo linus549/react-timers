@@ -411,6 +411,32 @@ html.dark .input-field__error {
   white-space: nowrap;
 }
 
+.toggle__permission-btn {
+  color: var(--primary);
+  background-color: inherit;
+  border: none;
+}
+
+.toggle__permission-btn:hover,
+.toggle__permission-btn:active {
+  color: var(--primary-alt);
+}
+
+html.dark .toggle__permission-btn {
+  color: var(--primary-text);
+  background-color: var(--primary);
+}
+
+html.dark .toggle__permission-btn:hover,
+html.dark .toggle__permission-btn:active {
+  background-color: var(--primary-alt);
+}
+
+html.dark .toggle__permission-btn:focus {
+  color: var(--primary);
+  background-color: var(--primary-text);
+}
+
 .toggle__checkbox {
   flex-shrink: 0;
   width: 1.5rem;
