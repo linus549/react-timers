@@ -1,9 +1,9 @@
 import { useRef, useEffect } from "react";
 import Button from "components/common/Button";
+import { states } from "components/Timer/Timer";
 
 function Buttons({
   timerState,
-  isResetDisabled,
   onStartClick,
   onStopClick,
   onResetClick,
@@ -13,18 +13,16 @@ function Buttons({
   const stopButtonRef = useRef(null);
   const resetButtonRef = useRef(null);
 
+  // TODO: only focus reset button when:
+  // - stop button has focus and timer finishes
+  // - finished timer becomes selected
   useEffect(
     function setFocus() {
-      // start -> focus stop button
-      if (timerState.isStarted) {
+      if (timerState === states.STARTED) {
         stopButtonRef.current.focus();
-      }
-      // finish -> focus reset button
-      else if (timerState.isFinished) {
+      } else if (timerState === states.FINISHED) {
         resetButtonRef.current.focus();
-      }
-      // stop or reset -> focus start button
-      else {
+      } else {
         startButtonRef.current.focus();
       }
     },
@@ -33,11 +31,11 @@ function Buttons({
 
   return (
     <div className="button-container timer__button-container">
-      {!timerState.isFinished && (
+      {timerState !== states.FINISHED && (
         <>
           <Button
             ref={startButtonRef}
-            disabled={timerState.isStarted}
+            disabled={timerState === states.STARTED}
             variant="primary"
             className="timer__start"
             onClick={onStartClick}
@@ -47,7 +45,9 @@ function Buttons({
 
           <Button
             ref={stopButtonRef}
-            disabled={!timerState.isStarted}
+            disabled={
+              timerState === states.STOPPED || timerState === states.RESET
+            }
             variant="primary"
             className="timer__stop"
             onClick={onStopClick}
@@ -59,7 +59,7 @@ function Buttons({
 
       <Button
         ref={resetButtonRef}
-        disabled={isResetDisabled}
+        disabled={timerState === states.RESET}
         variant="secondary"
         className="timer__reset"
         onClick={onResetClick}

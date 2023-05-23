@@ -1,4 +1,4 @@
-import { useState, useReducer, useRef, useEffect } from "react";
+import { useState, useRef, useEffect } from "react";
 import usePrevious from "hooks/usePrevious";
 import Buttons from "components/Timer/Buttons";
 
@@ -12,9 +12,10 @@ function Timer({
   onFinish,
   appDispatch,
 }) {
-  const [state, dispatch] = useReducer(reducer, INITIAL_STATE);
   const [remaining, setRemaining] = useState(initialRemaining);
-  const wasFinished = usePrevious(state.isFinished);
+  const [state, setState] = useState(states.RESET);
+  const isFinished = state === states.FINISHED;
+  const wasFinished = usePrevious(isFinished);
   const intervalIdRef = useRef(null);
   const timeoutIdRef = useRef(null);
   const formattedRemaining = formatTime(remaining);
@@ -24,7 +25,7 @@ function Timer({
     className += " timer--selected";
   }
 
-  if (state.isFinished) {
+  if (isFinished) {
     className += " timer--finished";
   }
 
@@ -39,7 +40,7 @@ function Timer({
 
   useEffect(
     function finish() {
-      if (state.isFinished && !wasFinished) {
+      if (isFinished && !wasFinished) {
         if (isSelected && inDocumentTitle) {
           // document title is sometimes off on finish, so set it manually
           document.title = "0:00";
@@ -48,31 +49,11 @@ function Timer({
         onFinish(label);
       }
     },
-    [
-      state.isFinished,
-      wasFinished,
-      isSelected,
-      inDocumentTitle,
-      onFinish,
-      label,
-    ]
-  );
-
-  useEffect(
-    function clearOnStop() {
-      if (!state.isStarted) {
-        clearInterval(intervalIdRef.current);
-        clearTimeout(timeoutIdRef.current);
-      }
-    },
-    [state.isStarted]
+    [isFinished, wasFinished, isSelected, inDocumentTitle, onFinish, label]
   );
 
   useEffect(function clearOnUnmount() {
-    return () => {
-      clearInterval(intervalIdRef.current);
-      clearTimeout(timeoutIdRef.current);
-    };
+    return clear;
   }, []);
 
   function handleTimerClick(e) {
@@ -95,19 +76,26 @@ function Timer({
 
     timeoutIdRef.current = setTimeout(() => {
       tick();
-      dispatch({ type: "finish" });
+      finish();
     }, remaining * 1000);
 
-    dispatch({ type: "start" });
+    setState(states.STARTED);
   }
 
   function stop() {
-    dispatch({ type: "stop" });
+    clear();
+    setState(states.STOPPED);
+  }
+
+  function finish() {
+    clear();
+    setState(states.FINISHED);
   }
 
   function reset() {
-    dispatch({ type: "reset" });
+    clear();
     setRemaining(initialRemaining);
+    setState(states.RESET);
   }
 
   function remove() {
@@ -116,6 +104,11 @@ function Timer({
 
   function tick() {
     setRemaining((remaining) => remaining - 1);
+  }
+
+  function clear() {
+    clearInterval(intervalIdRef.current);
+    clearTimeout(timeoutIdRef.current);
   }
 
   if (!isVisible) {
@@ -132,10 +125,10 @@ function Timer({
       <h2 className="timer__title">{label}</h2>
 
       <div className="timer__time">
-        {state.isFinished ? "Finished" : formattedRemaining}
+        {isFinished ? "Finished" : formattedRemaining}
       </div>
 
-      {!state.isFinished && (
+      {!isFinished && (
         <meter
           min="0"
           max={initialRemaining}
@@ -147,7 +140,6 @@ function Timer({
       {isSelected && (
         <Buttons
           timerState={state}
-          isResetDisabled={remaining === initialRemaining}
           onStartClick={start}
           onStopClick={stop}
           onResetClick={reset}
@@ -157,39 +149,6 @@ function Timer({
     </div>
   );
 }
-
-function reducer(state, action) {
-  switch (action.type) {
-    case "reset":
-      return INITIAL_STATE;
-
-    case "start":
-      return {
-        ...state,
-        isStarted: true,
-      };
-
-    case "stop":
-      return {
-        ...state,
-        isStarted: false,
-      };
-
-    case "finish":
-      return {
-        isStarted: false,
-        isFinished: true,
-      };
-
-    default:
-      throw new Error(`Unknown action: ${action.type}`);
-  }
-}
-
-const INITIAL_STATE = {
-  isStarted: false,
-  isFinished: false,
-};
 
 function formatTime(totalSeconds) {
   let { hours, minutes, seconds } = toHourMinSec(totalSeconds);
@@ -219,5 +178,12 @@ function toHourMinSec(seconds) {
     seconds: remainder,
   };
 }
+
+export const states = {
+  STARTED: "started",
+  STOPPED: "stopped",
+  FINISHED: "finished",
+  RESET: "reset",
+};
 
 export default Timer;
