@@ -1,14 +1,22 @@
 import { forwardRef } from "react";
 
 const Button = forwardRef(
-  ({ type, variant, className, children, ...props }, ref) => {
+  ({ type, variant, className: propsClassName, children, ...props }, ref) => {
+    let className = "btn";
+
+    if (variant) {
+      className += ` btn--${variant}`;
+    }
+
+    if (propsClassName) {
+      className += ` ${propsClassName}`;
+    }
+
     return (
       <button
         ref={ref}
-        type={type || "button"}
-        className={
-          (className || "") + (variant ? ` btn btn--${variant}` : " btn")
-        }
+        type={type ?? "button"}
+        className={className}
         {...props}
       >
         {children}
