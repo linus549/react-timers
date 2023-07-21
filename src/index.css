@@ -267,6 +267,7 @@ html.dark a:focus {
 
 .view__title {
   text-align: center;
+  max-width: none;
   margin-bottom: 0;
   padding: var(--spacing-lg);
 }
